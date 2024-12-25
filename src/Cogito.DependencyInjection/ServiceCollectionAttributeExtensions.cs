@@ -18,6 +18,21 @@ namespace Cogito.DependencyInjection
         /// Registers all types by their decorated registration attributes.
         /// </summary>
         /// <param name="builder"></param>
+        /// <param name="assembly"></param>
+        public static void AddFromAttributes(this IServiceCollection builder, Assembly assembly)
+        {
+            if (builder == null)
+                throw new ArgumentNullException(nameof(builder));
+            if (assembly == null)
+                throw new ArgumentNullException(nameof(assembly));
+
+            AddFromAttributes(builder, (IEnumerable<Assembly>)[assembly]);
+        }
+
+        /// <summary>s
+        /// Registers all types by their decorated registration attributes.
+        /// </summary>
+        /// <param name="builder"></param>
         /// <param name="assemblies"></param>
         public static void AddFromAttributes(this IServiceCollection builder, params Assembly[] assemblies)
         {
@@ -26,7 +41,7 @@ namespace Cogito.DependencyInjection
             if (assemblies == null)
                 throw new ArgumentNullException(nameof(assemblies));
 
-            builder.AddFromAttributes((IEnumerable<Assembly>)assemblies);
+            AddFromAttributes(builder, (IEnumerable<Assembly>)assemblies);
         }
 
         /// <summary>s
@@ -41,7 +56,7 @@ namespace Cogito.DependencyInjection
             if (assemblies == null)
                 throw new ArgumentNullException(nameof(assemblies));
 
-            builder.AddFromAttributes(assemblies.SelectMany(i => GetAssemblyTypesSafe(i)));
+            AddFromAttributes(builder, assemblies.SelectMany(i => GetAssemblyTypesSafe(i)));
         }
 
         /// <summary>
@@ -71,16 +86,16 @@ namespace Cogito.DependencyInjection
             if (types == null)
                 throw new ArgumentNullException(nameof(types));
 
-            // group by unique registration handler types
+            // find the set of implementation types and associated registration attributes, ordered
             var items = types
                 .Select(i => i.GetTypeInfo())
-                .Select(i => new { ImplementationType = i, Attributes = i.GetCustomAttributes(typeof(IRegistrationAttribute), true).Cast<IRegistrationAttribute>() })
+                .Select(i => new { ImplementationType = i, Attributes = i.GetCustomAttributes(typeof(IServiceRegistrationAttribute), true).Cast<IServiceRegistrationAttribute>() })
                 .SelectMany(i => i.Attributes.Select(j => new { i.ImplementationType, Attribute = j }))
                 .OrderBy(i => i.Attribute.RegistrationOrder);
 
             // dispatch to associated handler
             foreach (var item in items)
-                item.Attribute.Register(builder, item.ImplementationType);
+                item.Attribute.Add(builder, item.ImplementationType);
         }
 
         /// <summary>
@@ -95,15 +110,15 @@ namespace Cogito.DependencyInjection
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            // group by unique registration handler types
+            // find the set of implementation types and associated registration attributes, ordered
             var items = type.GetTypeInfo()
-                .GetCustomAttributes(typeof(IRegistrationAttribute), true)
-                .Cast<IRegistrationAttribute>()
+                .GetCustomAttributes(typeof(IServiceRegistrationAttribute), true)
+                .Cast<IServiceRegistrationAttribute>()
                 .OrderBy(i => i.RegistrationOrder);
 
             // dispatch to associated handler
             foreach (var item in items)
-                item.Register(builder, type);
+                item.Add(builder, type);
         }
 
         /// <summary>
