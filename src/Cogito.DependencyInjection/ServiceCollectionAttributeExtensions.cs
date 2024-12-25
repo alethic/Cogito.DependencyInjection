@@ -19,14 +19,14 @@ namespace Cogito.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="assemblies"></param>
-        public static void RegisterFromAttributes(this IServiceCollection builder, params Assembly[] assemblies)
+        public static void AddFromAttributes(this IServiceCollection builder, params Assembly[] assemblies)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
             if (assemblies == null)
                 throw new ArgumentNullException(nameof(assemblies));
 
-            builder.RegisterFromAttributes((IEnumerable<Assembly>)assemblies);
+            builder.AddFromAttributes((IEnumerable<Assembly>)assemblies);
         }
 
         /// <summary>s
@@ -34,14 +34,14 @@ namespace Cogito.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="assemblies"></param>
-        public static void RegisterFromAttributes(this IServiceCollection builder, IEnumerable<Assembly> assemblies)
+        public static void AddFromAttributes(this IServiceCollection builder, IEnumerable<Assembly> assemblies)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
             if (assemblies == null)
                 throw new ArgumentNullException(nameof(assemblies));
 
-            builder.RegisterFromAttributes(assemblies.SelectMany(i => GetAssemblyTypesSafe(i)));
+            builder.AddFromAttributes(assemblies.SelectMany(i => GetAssemblyTypesSafe(i)));
         }
 
         /// <summary>
@@ -49,14 +49,14 @@ namespace Cogito.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="types"></param>
-        public static void RegisterFromAttributes(this IServiceCollection builder, params Type[] types)
+        public static void AddFromAttributes(this IServiceCollection builder, params Type[] types)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
             if (types == null)
                 throw new ArgumentNullException(nameof(types));
 
-            RegisterFromAttributes(builder, (IEnumerable<Type>)types);
+            AddFromAttributes(builder, (IEnumerable<Type>)types);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Cogito.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="types"></param>
-        public static void RegisterFromAttributes(this IServiceCollection builder, IEnumerable<Type> types)
+        public static void AddFromAttributes(this IServiceCollection builder, IEnumerable<Type> types)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
@@ -88,7 +88,7 @@ namespace Cogito.DependencyInjection
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="type"></param>
-        public static void RegisterFromAttributes(this IServiceCollection builder, Type type)
+        public static void AddFromAttributes(this IServiceCollection builder, Type type)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
@@ -110,7 +110,6 @@ namespace Cogito.DependencyInjection
         /// Catch exceptions when loading types.
         /// </summary>
         /// <param name="assembly"></param>
-        /// <param name="predicate"></param>
         /// <returns></returns>
         static ICollection<Type> GetAssemblyTypesSafe(this Assembly assembly)
         {
@@ -118,9 +117,7 @@ namespace Cogito.DependencyInjection
 
             try
             {
-                l = assembly.GetTypes()
-                    .Where(i => i != null)
-                    .ToList();
+                l.AddRange(assembly.GetTypes().Where(i => i != null));
             }
             catch (ReflectionTypeLoadException e)
             {
