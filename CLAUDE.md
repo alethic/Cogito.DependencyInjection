@@ -9,7 +9,7 @@ Publishes 1 package: `Cogito.DependencyInjection`.
 ## Build and test
 
 ```shell
-dotnet restore Cogito.DependencyInjection.sln
+dotnet restore Cogito.DependencyInjection.slnx
 dotnet msbuild -p:Configuration=Release Cogito.DependencyInjection.dist.msbuildproj
 ```
 

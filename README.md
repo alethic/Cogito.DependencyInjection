@@ -13,7 +13,7 @@ Each package carries its own README with the detail; the links above go to nuget
 ## Building
 
 ```shell
-dotnet restore Cogito.DependencyInjection.sln
+dotnet restore Cogito.DependencyInjection.slnx
 dotnet msbuild -p:Configuration=Release Cogito.DependencyInjection.dist.msbuildproj
 ```
 
